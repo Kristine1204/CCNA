@@ -1,4 +1,31 @@
 Day3 Network Engineer
+3.1 Interpret the components of routing table
+3.1.a Routing protocol code
+3.1.b Prefix
+3.1.c Network mask
+3.1.d Next hop
+3.1.e Administrative distance
+3.1.f Metric
+3.1.g Gateway of last resort
+
+3.2 Determine how a router makes a forwarding decision by default
+3.2.a Longest prefix match
+3.2.b Administrative distance
+3.2.c Routing protocol metric
+
+3.3 Configure and verify IPv4 and IPv6 static routing
+3.3.a Default route
+3.3.b Network route
+3.3.c Host route
+3.3.d Floating static
+
+3.4 Configure and verify single area OSPFv2
+3.4.a Neighbor adjacencies
+3.4.b Point-to-point
+3.4.c Broadcast (DR/BDR selection)
+3.4.d Router ID
+
+3.5 Describe the purpose, functions, and concepts of first hop redundancy protocols
 Task1: Review of Routing FUndamentals.
 rule: ping dikit, no dikit, no ping
 r1 to r4: ospf 1:
@@ -14,7 +41,7 @@ int e1/0
  do bp
 !These are floating Default Static routes with redundancy
  ip route 0.0.0.0 0.0.0.0 192.168.1.129 1
- ip route 0.0.0.0 0.0.0.0 192.168.1.130 2
+ ip route 0.0.0.0 0.0.0.0 192.168.1.130 5
  do sh ip route static
 @@S2
 config t
@@ -23,7 +50,7 @@ int e1/0
  ip add 10.2.2.133 255.255.255.0
  do bp
  ip route 0.0.0.0 0.0.0.0 10.2.2.2 1
- ip route 0.0.0.0 0.0.0.0 10.2.2.1 2
+ ip route 0.0.0.0 0.0.0.0 10.2.2.1 10
  do sh ip route static
 R4
 config t
@@ -41,7 +68,7 @@ ip dhcp pool vlan10
 config t
 int e1/0
    switchport mode access
-   switchport access vlan 200
+   switchport access vlan 100
    do show vlan brief
 !
 D2:
@@ -67,7 +94,7 @@ int e0/0
 A1: creating Floating Default route and Secondary Default Route:
 config t
 ip route 0.0.0.0 0.0.0.0 192.168.1.129 1
-ip route 0.0.0.0 0.0.0.0 192.168.1.130 2
+ip route 0.0.0.0 0.0.0.0 192.168.1.130 5
 do sh ip route static
 A2:
 config t
@@ -77,7 +104,7 @@ int e1/0
 A2: creating primary and backup default route:
 config t
 ip route 0.0.0.0 0.0.0.0 192.168.1.130 1
-ip route 0.0.0.0 0.0.0.0 192.168.1.129  2
+ip route 0.0.0.0 0.0.0.0 192.168.1.129 10
 do sh ip route static
 p1:
 config t
@@ -87,7 +114,9 @@ int e0/0
 P1: Creating Floating STATIC routes on p1 for vlan 200 and vlan 20:
 config t
 ip route  192.168.1.128 255.255.255.224 10.2.1.1 1
-ip route  192.168.1.130 255.255.255.255 10.2.1.2 10
+ip route  192.168.1.130 255.255.255.255 10.2.1.2 
+Ang tawag dito network static route
+Ang tawag dito host static route
 ! /32 is better than /27: longest prefix Rule.
 do sh ip route static
 p2:
@@ -99,7 +128,7 @@ P2: create static route for vlan 200 and a
 longest prefix rule[for Vip IP address] for 192.168.1.129 GATEWAY of 10.2.1.1
 config t
 ip route  192.168.1.128 255.255.255.224 10.2.1.2
-ip route  192.168.1.129 255.255.255.255 10.2.1.1
+ip route  192.168.1.129 255.255.255.255 10.2.1.1 
 do sh ip route static
 Pano mag static Route sa PC:
 cmd
@@ -109,14 +138,14 @@ How to Create Default Route Cisco/PC/EndDevices:
 p1:
 config T
 ip route 0.0.0.0  0.0.0.0 10.2.1.1 1
-ip route 0.0.0.0  0.0.0.0 10.2.1.2 2
+ip route 0.0.0.0  0.0.0.0 10.2.1.2 5
 !floating Static Routes
 do sh ip route static
 
 p2:
 config T
 ip route 0.0.0.0  0.0.0.0 10.2.1.2 1
-ip route 0.0.0.0  0.0.0.0 10.2.1.1 2
+ip route 0.0.0.0  0.0.0.0 10.2.1.1 5
 do sh ip route static
 
 D1:
@@ -280,7 +309,7 @@ router bgp 1
  network 208.8.8.0 mask 255.255.255.0
  network 209.9.9.0 mask 255.255.255.0
 end
-@@@ISP1:
+@@@ISP1: CONVERGE
 CONFIG T
 router bgp 45
 bgp log-neighbor-changes
